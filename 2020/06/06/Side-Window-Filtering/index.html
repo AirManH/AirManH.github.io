@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>Side Window Filtering | Air&#39;s Notebook | Just notebook</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="computer vision,denoise,filter">
+    <meta name="description" content="发表在 CVPR 2019 Oral [1] 原文 pdf 链接 作者在知乎上的介绍 ¶ Algorithm give $I$ such that minimize cost function $E$. where  $I &#x3D; \frac{1}{N_n} \sum{\omega \cdot q}$ $E &#x3D; || q - I ||_2^2$ possible windows: $S &#x3D; {L, R">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Side Window Filtering">
+<meta property="og:url" content="http://yoursite.com/2020/06/06/Side-Window-Filtering/index.html">
+<meta property="og:site_name" content="Air&#39;s Notebook">
+<meta property="og:description" content="发表在 CVPR 2019 Oral [1] 原文 pdf 链接 作者在知乎上的介绍 ¶ Algorithm give $I$ such that minimize cost function $E$. where  $I &#x3D; \frac{1}{N_n} \sum{\omega \cdot q}$ $E &#x3D; || q - I ||_2^2$ possible windows: $S &#x3D; {L, R">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-06-06T12:58:38.000Z">
+<meta property="article:modified_time" content="2020-06-06T13:08:22.488Z">
+<meta property="article:author" content="Air">
+<meta property="article:tag" content="computer vision">
+<meta property="article:tag" content="denoise">
+<meta property="article:tag" content="filter">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="Air&#39;s Notebook" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Air</h5>
+          <a href="mailto:airmanhigh@gmail.com" title="airmanhigh@gmail.com" class="mail">airmanhigh@gmail.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                存档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                关键字
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/AirManH" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Side Window Filtering</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">Side Window Filtering</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-06-06T12:58:38.000Z" itemprop="datePublished" class="page-time">
+  2020-06-06
+</time>
+
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Algorithm"><span class="post-toc-number">1.</span> <span class="post-toc-text">Algorithm</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Background"><span class="post-toc-number">2.</span> <span class="post-toc-text">Background</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Edge-preserving-filters"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">Edge-preserving filters</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#global-optimization-based-algorithms"><span class="post-toc-number">2.1.1.</span> <span class="post-toc-text">global optimization based algorithms</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#local-optimization-based-algorithms"><span class="post-toc-number">2.1.2.</span> <span class="post-toc-text">local optimization based algorithms</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Filtering-Fundamentals"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">Filtering Fundamentals</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#common-assume"><span class="post-toc-number">2.2.1.</span> <span class="post-toc-text">common assume</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#cost-function"><span class="post-toc-number">2.2.2.</span> <span class="post-toc-text">cost function</span></a></li><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#trade-off"><span class="post-toc-number">2.2.3.</span> <span class="post-toc-text">trade off</span></a></li></ol></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Type-of-typical-edges"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">Type of typical edges [4]</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Anything"><span class="post-toc-number">3.</span> <span class="post-toc-text">Anything</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Definition-of-side-window"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">Definition of side window</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#I-Don’t-Understand"><span class="post-toc-number">4.</span> <span class="post-toc-text">I Don’t Understand</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-Side-Window-Filtering"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Side Window Filtering</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-06-06 20:58:38" datetime="2020-06-06T12:58:38.000Z"  itemprop="datePublished">2020-06-06</time>
+
+            
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>发表在 <a href="http://cvpr2019.thecvf.com/" target="_blank" rel="noopener">CVPR 2019 Oral</a> <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
+<p><a href="https://arxiv.org/pdf/1905.07177.pdf" target="_blank" rel="noopener">原文 pdf 链接</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/58326095" target="_blank" rel="noopener">作者在知乎上的介绍</a></p>
+<h2 id="Algorithm"><a class="header-anchor" href="#Algorithm">¶ </a>Algorithm</h2>
+<p>give $I$ such that <strong>minimize</strong> cost function $E$.</p>
+<p>where</p>
+<ul>
+<li>$I = \frac{1}{N_n} \sum{\omega \cdot q}$</li>
+<li>$E = || q - I ||_2^2$</li>
+<li>possible windows: $S = {L, R, U, D, NW, NE, SW, SE}$</li>
+<li>input of pixel: $q$, output of pixel: $I$</li>
+<li>local window: $\Omega$, pixel in window $\Omega$: $q$, kernel_weight: $\omega$</li>
+</ul>
+<h2 id="Background"><a class="header-anchor" href="#Background">¶ </a>Background</h2>
+<h3 id="Edge-preserving-filters"><a class="header-anchor" href="#Edge-preserving-filters">¶ </a>Edge-preserving filters</h3>
+<p>Two categories</p>
+<h4 id="global-optimization-based-algorithms"><a class="header-anchor" href="#global-optimization-based-algorithms">¶ </a>global optimization based algorithms</h4>
+<ul>
+<li>total variation (TV) algorithm</li>
+<li>iterative shrinkage approach</li>
+<li>relative total variation algorithm</li>
+<li>weighted least squares algorithm</li>
+</ul>
+<h4 id="local-optimization-based-algorithms"><a class="header-anchor" href="#local-optimization-based-algorithms">¶ </a>local optimization based algorithms</h4>
+<ul>
+<li>bilateral filter 双边滤波器<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup></li>
+<li>bilateral filter accelerated versions</li>
+<li>guided filter 导向滤波</li>
+<li>guided filter extensions</li>
+<li>rolling guidance filter</li>
+<li>mutual structure joint filtering</li>
+<li>curvature filter<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup></li>
+</ul>
+<h3 id="Filtering-Fundamentals"><a class="header-anchor" href="#Filtering-Fundamentals">¶ </a>Filtering Fundamentals</h3>
+<h4 id="common-assume"><a class="header-anchor" href="#common-assume">¶ </a>common assume</h4>
+<ul>
+<li>
+<p>image is <strong>piecewise</strong> linear</p>
+</li>
+<li>
+<p>approximate a pixel as the weighted average of its neighbor pixels over a local window<br>
+$$<br>
+I_i’ = \sum_{j \in \Omega_i} \omega_{ij} q_j<br>
+$$</p>
+</li>
+</ul>
+<h4 id="cost-function"><a class="header-anchor" href="#cost-function">¶ </a>cost function</h4>
+<p>$$<br>
+E_i = { {|| I_i - I_i’ ||}_2 }^2<br>
+$$</p>
+<p>$$<br>
+= (I_i - \sum_{j \in \Omega_i} \omega_{ij} q_j) ^ 2<br>
+$$</p>
+<h4 id="trade-off"><a class="header-anchor" href="#trade-off">¶ </a>trade off</h4>
+<ol>
+<li>manipulating the input image towards a desired target 去噪声</li>
+<li>keeping it close to the original 保真</li>
+</ol>
+<h3 id="Type-of-typical-edges"><a class="header-anchor" href="#Type-of-typical-edges">¶ </a>Type of typical edges <sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup></h3>
+<ul>
+<li>
+<p>step edge</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">     ┌─────</span><br><span class="line">     │</span><br><span class="line">     │</span><br><span class="line">     │</span><br><span class="line">─────┘</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>ramp edge</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">          ┌─────</span><br><span class="line">         &#x2F;</span><br><span class="line">       &#x2F;</span><br><span class="line">      &#x2F;</span><br><span class="line">─────┘</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>roof edge</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">    &#x2F;\</span><br><span class="line">   &#x2F;  \</span><br><span class="line">  &#x2F;    \</span><br><span class="line"> &#x2F;      \</span><br><span class="line">&#x2F;        \</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>line edge</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">     ┌─┐</span><br><span class="line">     │ │</span><br><span class="line">     │ │</span><br><span class="line">     │ │</span><br><span class="line">─────┘ └─────</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>这些函数是连续但不可导的（考虑$|x|$）</p>
+<h2 id="Anything"><a class="header-anchor" href="#Anything">¶ </a>Anything</h2>
+<ul>
+<li><em>1.2. Problem and Motivation</em> 部分用 $g(x, y)$ 和 <em>Taylor expansion</em> 来说明在边缘处，两侧点的取值差距较大。因此跳跃点两侧应当分开来进行考虑。</li>
+</ul>
+<h3 id="Definition-of-side-window"><a class="header-anchor" href="#Definition-of-side-window">¶ </a>Definition of side window</h3>
+<ul>
+<li>
+<p><em>2. Side Window Filtering Technique</em> 中对参数 $\varphi$ 的说明不足。如下图所示，论文中认为 $OD$ 是定长 $r$，矩形 $Q$ 是固定的；而 $OA$ 为变长 $\varphi$，矩形 $P$ 是可伸缩的</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">A┌─────┐B</span><br><span class="line"> │  P  │</span><br><span class="line">O├─────┤E</span><br><span class="line"> │  Q  │</span><br><span class="line">D└─────┘C</span><br></pre></td></tr></table></figure>
+</li>
+<li>
+<p>论文中认为 $OE$ 线条的宽度为 $1$ 像素，而其他线条宽度为 $0$</p>
+</li>
+</ul>
+<h2 id="I-Don’t-Understand"><a class="header-anchor" href="#I-Don’t-Understand">¶ </a>I Don’t Understand</h2>
+<blockquote>
+<p>It is worth noting that optimization problem of the form similar<br>
+to eq. (2) is found in many applications including coloriza-<br>
+tion [14][22] and image segmentation [25][28], where the<br>
+weight functions are usually referred to as affinity functions.<br>
+Nonlinear approximation filtering such as median filtering<br>
+can also be formulated as a similar form of optimization<br>
+problem</p>
+</blockquote>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>What is Oral? <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p><a href="https://zh.wikipedia.org/zh-cn/%E5%8F%8C%E8%BE%B9%E6%BB%A4%E6%B3%A2%E5%99%A8" target="_blank" rel="noopener">https://zh.wikipedia.org/zh-cn/双边滤波器</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p><a href="https://github.com/YuanhaoGong/CurvatureFilter" target="_blank" rel="noopener">https://github.com/YuanhaoGong/CurvatureFilter</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p><a href="https://www.researchgate.net/figure/Type-of-Edges-a-Step-Edge-b-Ramp-Edge-c-Line-Edge-d-Roof-Edge_fig1_228349759" target="_blank" rel="noopener">https://www.researchgate.net/figure/Type-of-Edges-a-Step-Edge-b-Ramp-Edge-c-Line-Edge-d-Roof-Edge_fig1_228349759</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-06-06T13:08:22.488Z" itemprop="dateUpdated">2020-06-06 21:08:22</time>
+</span><br>
+
+
+        
+    </div>
+    
+    <footer>
+        <a href="http://yoursite.com">
+            <img src="/img/avatar.jpg" alt="Air">
+            Air
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/computer-vision/" rel="tag">computer vision</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/denoise/" rel="tag">denoise</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/filter/" rel="tag">filter</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2020/06/06/Side-Window-Filtering/&title=《Side Window Filtering》 — Air's Notebook&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2020/06/06/Side-Window-Filtering/&title=《Side Window Filtering》 — Air's Notebook&source=Just notebook" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2020/06/06/Side-Window-Filtering/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Side Window Filtering》 — Air's Notebook&url=http://yoursite.com/2020/06/06/Side-Window-Filtering/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2020/06/06/Side-Window-Filtering/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2020/06/06/Side-Window-Filtering-%E8%B0%83%E7%A0%94%E6%8A%A5%E5%91%8A/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Side Window Filtering 调研报告</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Air &copy; 2020</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2020/06/06/Side-Window-Filtering/&title=《Side Window Filtering》 — Air's Notebook&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2020/06/06/Side-Window-Filtering/&title=《Side Window Filtering》 — Air's Notebook&source=Just notebook" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2020/06/06/Side-Window-Filtering/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Side Window Filtering》 — Air's Notebook&url=http://yoursite.com/2020/06/06/Side-Window-Filtering/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2020/06/06/Side-Window-Filtering/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAAAAACs8KCBAAACKUlEQVR42u3aQW6DQAwF0Nz/0qnUbQt826QqM48VQhHwWDhj/3m94uP9fRyd51fOr//8zc0HBgbGYxnJ7d6Do/esMhUDA2MDRq/IHr3oeT08//3Rcy+egoGBgXFaFntFOaFiYGBg3MVIzvNyjIGBgTFpYs8XefkELF9ufqQXx8DAeCBjHgx87vxP8w0MDIx/yZiP+6thQPV69CYYGBhLM3pD/+R6NcjM7xb14hgYGEszetsvJgFk3gxftNAYGBiLMpJAsXqeD9Emm8AwMDB2Y0zigShcDMp6Hjn88g4YGBhLM3plrjqAq7503vRiYGDsw6gu1yZ5YnXpWW56MTAwlmMkD6uO5JIgofr5Lt4HAwNjG0Ze7PItF72CW92KgYGBsTYjDw57i79eqDBZRGJgYKzKqN46/x69otkb0mFgYKzKuCsSiOp3cVFYCA8wMDCWZuQj/uqV3kCtN/jDwMDYgZEvAT8RA0w2W2BgYOzA6LWv+bawvNHNYYdNLAYGxqKMSRiQLCLzrWPVVhkDA2MfxqSw5iHBfFR3gcHAwFiaMdluNSmphUVeHItiYGCsyngXj7u2c/W2YhT+NzAwMBZi9LZHTMb6eZCZLDdf1QMDA+OxjOq4Px/c55swegUXAwNjN8YkXOxFj9Um9mJUh4GBgVEc6PcK7mgYh4GBgdFqLHvDuLw9xsDA2I1RbWJ7oUK1mBY+DQYGxtKMeTDQe91qVDkKLzEwMJ7K+AI6sikuNTcSEQAAAABJRU5ErkJggg==" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

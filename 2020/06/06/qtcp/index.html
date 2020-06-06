@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>qtcp | Air&#39;s Notebook | Just notebook</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="reinforcement learning,tcp,congestion control">
+    <meta name="description" content="QTCP: Adaptive Congestion Control with Reinforcement Learning IEEE Transactions on Network Science and Engineering ¶ Model Q-learning + Kanerva Coding ¶ State  average packet sending interval average">
+<meta property="og:type" content="article">
+<meta property="og:title" content="qtcp">
+<meta property="og:url" content="http://yoursite.com/2020/06/06/qtcp/index.html">
+<meta property="og:site_name" content="Air&#39;s Notebook">
+<meta property="og:description" content="QTCP: Adaptive Congestion Control with Reinforcement Learning IEEE Transactions on Network Science and Engineering ¶ Model Q-learning + Kanerva Coding ¶ State  average packet sending interval average">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2020/06/06/qtcp/fixed_bandwidth_RTT.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/06/qtcp/dynamic_bandwidth_RTT.png">
+<meta property="article:published_time" content="2020-06-06T14:28:05.000Z">
+<meta property="article:modified_time" content="2020-06-06T14:39:42.712Z">
+<meta property="article:author" content="Air">
+<meta property="article:tag" content="reinforcement learning">
+<meta property="article:tag" content="tcp">
+<meta property="article:tag" content="congestion control">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/06/qtcp/fixed_bandwidth_RTT.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="Air&#39;s Notebook" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Air</h5>
+          <a href="mailto:airmanhigh@gmail.com" title="airmanhigh@gmail.com" class="mail">airmanhigh@gmail.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                存档
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                关键字
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/AirManH" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">qtcp</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">qtcp</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-06-06T14:28:05.000Z" itemprop="datePublished" class="page-time">
+  2020-06-06
+</time>
+
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Model"><span class="post-toc-number">1.</span> <span class="post-toc-text">Model</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#State"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">State</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Action"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">Action</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Reward"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">Reward</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Training"><span class="post-toc-number">2.</span> <span class="post-toc-text">Training</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Parameters"><span class="post-toc-number">2.1.</span> <span class="post-toc-text">Parameters</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Environment-setting"><span class="post-toc-number">2.2.</span> <span class="post-toc-text">Environment setting</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Fixed-bandwidth"><span class="post-toc-number">2.3.</span> <span class="post-toc-text">Fixed bandwidth</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#Dynamic-bandwidth"><span class="post-toc-number">2.4.</span> <span class="post-toc-text">Dynamic bandwidth</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-qtcp"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">qtcp</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-06-06 22:28:05" datetime="2020-06-06T14:28:05.000Z"  itemprop="datePublished">2020-06-06</time>
+
+            
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>QTCP: Adaptive Congestion Control with Reinforcement Learning</p>
+<p><em>IEEE Transactions on Network Science and Engineering</em></p>
+<h2 id="Model"><a class="header-anchor" href="#Model">¶ </a>Model</h2>
+<p>Q-learning + Kanerva Coding</p>
+<h3 id="State"><a class="header-anchor" href="#State">¶ </a>State</h3>
+<ul>
+<li>average packet sending interval</li>
+<li>average consecutive ACK received interval</li>
+<li>average RTT</li>
+<li><strong>Kanerva Coding</strong> :question:
+<ul>
+<li>work as a function approximation</li>
+<li>to reducing the huge, continous state space</li>
+</ul>
+</li>
+</ul>
+<h3 id="Action"><a class="header-anchor" href="#Action">¶ </a>Action</h3>
+<ul>
+<li>increase: +10, decrease: -1, Keep: 0</li>
+</ul>
+<h3 id="Reward"><a class="header-anchor" href="#Reward">¶ </a>Reward</h3>
+<ul>
+<li>Utility = $\alpha \times \log{throughput} - \sigma \times \log{RTT}$</li>
+<li>reward =
+<ol>
+<li>$a (a &gt; 0)$, if $U’ &gt; \epsilon$</li>
+<li>$b (b &lt; 0)$, if $U’ &lt; -\epsilon$</li>
+</ol>
+</li>
+</ul>
+<h2 id="Training"><a class="header-anchor" href="#Training">¶ </a>Training</h2>
+<p><strong>Online!</strong></p>
+<h3 id="Parameters"><a class="header-anchor" href="#Parameters">¶ </a>Parameters</h3>
+<table>
+<thead>
+<tr>
+<th>Parameters</th>
+<th style="text-align:right">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Learning rate $\alpha$</td>
+<td style="text-align:right">0.95, *<em><strong>0.995 per second</strong></em></td>
+</tr>
+<tr>
+<td>Exploration rate</td>
+<td style="text-align:right">0.1, *<em><strong>0.9995 per second</strong></em></td>
+</tr>
+<tr>
+<td>Discount factor $\gamma$</td>
+<td style="text-align:right">0.9</td>
+</tr>
+<tr>
+<td>Reward update time</td>
+<td style="text-align:right">0.23 s</td>
+</tr>
+<tr>
+<td>Simulation time</td>
+<td style="text-align:right">800 s</td>
+</tr>
+<tr>
+<td>RTT</td>
+<td style="text-align:right">120 ms</td>
+</tr>
+<tr>
+<td>buffer size</td>
+<td style="text-align:right">200 packet</td>
+</tr>
+<tr>
+<td>Generalization tolerance factor $\beta$</td>
+<td style="text-align:right">0.8</td>
+</tr>
+</tbody>
+</table>
+<h3 id="Environment-setting"><a class="header-anchor" href="#Environment-setting">¶ </a>Environment setting</h3>
+<ul>
+<li>NS-3 Simulator</li>
+<li>2 Senders $\leftrightarrow$ Router $\leftarrow$ wireless $\rightarrow$ Router $\leftrightarrow$ 2 Reciever</li>
+</ul>
+<h3 id="Fixed-bandwidth"><a class="header-anchor" href="#Fixed-bandwidth">¶ </a>Fixed bandwidth</h3>
+<p>40 Mbps</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="fixed_bandwidth_RTT.png" alt="65%](fixed_bandwidth_throughput.png) ![65%" title="">
+                </div>
+                <div class="image-caption">65%](fixed_bandwidth_throughput.png) ![65%</div>
+            </figure>
+<h3 id="Dynamic-bandwidth"><a class="header-anchor" href="#Dynamic-bandwidth">¶ </a>Dynamic bandwidth</h3>
+<p>60 Mbps, 40s $\to$ 30 Mbps, 10s $\to …$</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="dynamic_bandwidth_RTT.png" alt="110%](dynamic_bandwidth_throughput.png) ![110%" title="">
+                </div>
+                <div class="image-caption">110%](dynamic_bandwidth_throughput.png) ![110%</div>
+            </figure>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    最后更新时间：<time datetime="2020-06-06T14:39:42.712Z" itemprop="dateUpdated">2020-06-06 22:39:42</time>
+</span><br>
+
+
+        
+    </div>
+    
+    <footer>
+        <a href="http://yoursite.com">
+            <img src="/img/avatar.jpg" alt="Air">
+            Air
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/congestion-control/" rel="tag">congestion control</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/reinforcement-learning/" rel="tag">reinforcement learning</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/tcp/" rel="tag">tcp</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2020/06/06/qtcp/&title=《qtcp》 — Air's Notebook&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2020/06/06/qtcp/&title=《qtcp》 — Air's Notebook&source=Just notebook" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2020/06/06/qtcp/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《qtcp》 — Air's Notebook&url=http://yoursite.com/2020/06/06/qtcp/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2020/06/06/qtcp/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between flex-row-reverse">
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2020/06/06/Multi-Path-TCP-RL/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">Multi-Path TCP RL</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>博客内容遵循 <a rel="license noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh" target="_blank">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Air &copy; 2020</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://yoursite.com/2020/06/06/qtcp/&title=《qtcp》 — Air's Notebook&pic=http://yoursite.com/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://yoursite.com/2020/06/06/qtcp/&title=《qtcp》 — Air's Notebook&source=Just notebook" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://yoursite.com/2020/06/06/qtcp/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《qtcp》 — Air's Notebook&url=http://yoursite.com/2020/06/06/qtcp/&via=http://yoursite.com" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://yoursite.com/2020/06/06/qtcp/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAK4AAACuCAAAAACKZ2kyAAABwUlEQVR42u3awWqEUAwFUP//p6fQVWHgeZPo08JxNUyrPXYRkpt3HPH1+b2+Pye/+ff6/v6448LFxR1zP8trzU0o+TPXBlxc3P3cakmaQ5PiiIuL+35u8jLrJiYpjri4uP+Lu0ascb2BChcX91lu3r5MGp28GbpgVsPFxR1wJ4HpVZ835bu4uLjjrcQkPE2Cj/Jfx8XF3cJNIo/19wliEqwcPQQuLu4N3OrQkj8z/2lzyYqLizvmVlcdybhSPWZRWNvg4uK+gDs5VtVbmZz8g3Bxcbdwe6NIDzoZkE76Mlxc3Nu48+Fnssm5YL2Ki4t7Aze/oRd9ToISXFzcndz8QVViPvwUyiUuLu5Gbj7GTI5oXLCwwcXFfYhb3tAGxS5/jZOiiYuLu4U7iTaqd02GIlxc3J3cy5qP1iGMJI7BxcV9ilsNMW85TpEXMlxc3C3cauRRLUb5Xc1tDy4u7qXcakHJQ5O82OWLW1xc3J3c3mqk3KDEheykwOHi4m7k5u1IcpAiWoq0XhgXF/dt3Pw4RbUxuqWQ4eLibudW1y295gYXF/dZ7qS4VFeq1SikGYvg4uIOuJPAtBp/9FooXFzcjdwfFnQGHEsyL10AAAAASUVORK5CYII=" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+});
+
+MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i=0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" async></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
